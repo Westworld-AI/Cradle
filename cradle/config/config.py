@@ -212,6 +212,7 @@ class Config(metaclass=Singleton):
         named_windows = get_named_windows(self.IDE_NAME)
         if len(named_windows) <= 0:
             ide_window = get_active_window()
+            print("ide_window:",ide_window)
             self.ide_name = ide_window.title
         else:
             self.ide_name = self.IDE_NAME

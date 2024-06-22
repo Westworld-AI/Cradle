@@ -1,4 +1,5 @@
 import os
+import time
 from typing import (
     Any,
     Dict,
@@ -92,20 +93,21 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
 
         key_var_name = conf_dict[PROVIDER_SETTING_KEY_VAR]
 
+        key = os.getenv(key_var_name)
+        endpoint_var_name = conf_dict[PROVIDER_SETTING_BASE_VAR]
+        endpoint = os.getenv(endpoint_var_name)
         if conf_dict[PROVIDER_SETTING_IS_AZURE]:
 
-            key = os.getenv(key_var_name)
-            endpoint_var_name = conf_dict[PROVIDER_SETTING_BASE_VAR]
-            endpoint = os.getenv(endpoint_var_name)
+            api_version = conf_dict[PROVIDER_SETTING_API_VERSION]
+            print("api_version:", api_version)
 
             self.client = AzureOpenAI(
                 api_key = key,
-                api_version = conf_dict[PROVIDER_SETTING_API_VERSION],
+                api_version = api_version,
                 azure_endpoint = endpoint
             )
         else:
-            key = os.getenv(key_var_name)
-            self.client = OpenAI(api_key=key)
+            self.client = OpenAI(base_url=endpoint,api_key=key)
 
         self.embedding_model = conf_dict[PROVIDER_SETTING_EMB_MODEL]
         self.llm_model = conf_dict[PROVIDER_SETTING_COMP_MODEL]
@@ -316,6 +318,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
         ) -> Tuple[str, Dict[str, int]]:
 
             """Send a request to the OpenAI API."""
+            start_time = time.time()  # 记录方法调用前的时间
             if self.provider_cfg[PROVIDER_SETTING_IS_AZURE]:
                 response = self.client.chat.completions.create(model=model,
                 messages=messages,
@@ -334,6 +337,10 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
                 logger.double_check()
 
             message = response.choices[0].message.content
+
+            end_time = time.time()  # 记录方法调用后的时间
+            execution_time = end_time - start_time  # 计算执行时间
+            print(f">>>>>>>>>>>>>>>>>>>>>>>>>>>>> openai chat time: {execution_time} seconds")  # 打印执行时间
 
             info = {
                 "prompt_tokens" : response.usage.prompt_tokens,

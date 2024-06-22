@@ -1,6 +1,7 @@
 import os
 import argparse
 import atexit
+import time
 from typing import Dict, Any
 
 from cradle.utils.string_utils import replace_unsupported_chars
@@ -104,51 +105,79 @@ class PipelineRunner():
         logger.write('>>> Markdown generated.')
         logger.write('>>> Bye.')
 
+    import time  # 导入time模块
+
     def run(self):
 
         # 1. Initiate the parameters
+        start_time = time.time()  # 记录开始时间
         success = False
         init_params = {
             "task_description": self.task_description,
             "skill_library": self.skill_library,
         }
         memory.update_info_history(init_params)
+        end_time = time.time()  # 记录结束时间
+        logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 初始化参数耗时 {:.2f} seconds".format(end_time - start_time))  # 打印持续时间
 
         # 2. Switch to game
+        start_time = time.time()
         self.gm.switch_to_game()
+        end_time = time.time()
+        logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 初始化参数耗时 {:.2f} seconds".format(end_time - start_time))
 
         # 3. Start video recording
+        start_time = time.time()
         video_record.start_capture()
+        end_time = time.time()
+        logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 初始化参数耗时 {:.2f} seconds".format(end_time - start_time))
 
         # 4. Initiate screen shot path and video clip path
+        start_time = time.time()
         self.video_clip(init=True)
+        end_time = time.time()
+        logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 初始化参数耗时 {:.2f} seconds".format(end_time - start_time))
 
         # 6. Start the pipeline
         step = 0
         while not success:
             try:
                 # 7.1. Information gathering
+                start_time = time.time()
                 self.run_information_gathering()
+                end_time = time.time()
+                logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 信息收集耗时 {:.2f} seconds".format(end_time - start_time))
+
                 # 7.2. Self reflection
+                start_time = time.time()
                 self.run_self_reflection()
+                end_time = time.time()
+                logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 自我反思耗时 {:.2f} seconds".format(end_time - start_time))
+
                 # 7.3. Task inference
+                start_time = time.time()
                 self.run_task_inference()
+                end_time = time.time()
+                logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 任务推断耗时 {:.2f} seconds".format(end_time - start_time))
+
                 # 7.4. Action planning
+                start_time = time.time()
                 self.run_action_planning()
+                end_time = time.time()
+                logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 行动规划耗时 {:.2f} seconds".format(end_time - start_time))
 
                 step += 1
 
                 if step > config.max_steps:
-                    logger.write('Max steps reached, exiting.')
+                    logger.write('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  达到最大步数, 退出.')
                     break
 
             except KeyboardInterrupt:
-                logger.write('KeyboardInterrupt Ctrl+C detected, exiting.')
+                logger.write('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  检测到键盘中断 Ctrl+C，退出。.')
                 self.pipeline_shutdown()
                 break
 
         self.pipeline_shutdown()
-
 
     def run_information_gathering(self):
 
