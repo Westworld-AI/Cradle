@@ -3,7 +3,7 @@ import json
 from groundingdino.util.inference import load_image
 from typing import Any, Dict, List
 import re
-from copy import deepcopy
+import copy
 
 from cradle.provider import BaseProvider
 from cradle.log import Logger
