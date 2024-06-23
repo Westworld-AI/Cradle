@@ -133,7 +133,17 @@ class InformationGatheringProvider(BaseProvider):
         self._check_input_keys(params)
 
         message_prompts = self.llm_provider.assemble_prompt(template_str=self.template, params=params)
-        logger.debug(f'{logger.UPSTREAM_MASK}{json.dumps(message_prompts, ensure_ascii=False)}\n')
+
+        # 创建 message_prompts 的深拷贝
+        message_prompts_copy = copy.deepcopy(message_prompts)
+        # 遍历拷贝，删除 image_url 中的 url 内容
+        for item in message_prompts_copy:
+            if item["role"] == "user":
+                for content in item["content"]:
+                    if content["type"] == "image_url":
+                        content["image_url"]["url"] = ""  # 或者使用 "url": "[REDACTED]" 来明确表示内容被删除
+        # 使用修改后的拷贝打印日志
+        logger.debug(f'{logger.UPSTREAM_MASK}{json.dumps(message_prompts_copy, ensure_ascii=False)}\n')
 
         processed_response = {}
         try:

@@ -180,13 +180,18 @@ class PipelineRunner():
         self.pipeline_shutdown()
 
     def run_information_gathering(self):
-
         # Get params
-        # 1. Get the video clip to informaiton gathering
+        start_time = time.time()  # Start timing for video clip preparation
+        # 1. Get the video clip to information gathering
         self.video_clip()
+        end_time = time.time()  # End timing for video clip preparation
+        logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 视频片段准备耗时 {:.2f} 秒".format(end_time - start_time))  # Print the duration in seconds
 
+        start_time = time.time()  # Start timing for information gathering execution
         # 2. Execute the information gathering provider
         self.information_gathering()
+        end_time = time.time()  # End timing for information gathering execution
+        logger.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> 信息收集执行耗时 {:.2f} 秒".format(end_time - start_time))  # Print the duration in seconds
 
     def run_self_reflection(self):
 
