@@ -3,7 +3,7 @@ import json
 from groundingdino.util.inference import load_image
 from typing import Any, Dict, List
 import re
-import copy
+from copy import deepcopy
 
 from cradle.provider import BaseProvider
 from cradle.log import Logger
@@ -135,20 +135,16 @@ class InformationGatheringProvider(BaseProvider):
         message_prompts = self.llm_provider.assemble_prompt(template_str=self.template, params=params)
 
         # 创建 message_prompts 的深拷贝
-        message_prompts_copy = copy.deepcopy(message_prompts)
+        message_prompts_copy = deepcopy(message_prompts)
         # 遍历拷贝，删除 image_url 中的 url 内容
-        for item in message_prompts_copy:
-            if item["role"] == "user":
-                for content in item["content"]:
-                    if content["type"] == "image_url":
-                        content["image_url"]["url"] = ""  # 或者使用 "url": "[REDACTED]" 来明确表示内容被删除
-        # 使用修改后的拷贝打印日志
-        logger.debug(f'{logger.UPSTREAM_MASK}{json.dumps(message_prompts_copy, ensure_ascii=False)}\n')
+        self.remove_image_url(message_prompts_copy)
+        # 使用修改后的拷贝打印日志f
+        logger.write(f'{logger.UPSTREAM_MASK}{json.dumps(message_prompts_copy, ensure_ascii=False)}\n')
 
         processed_response = {}
         try:
             response, info = self.llm_provider.create_completion(message_prompts)
-            logger.debug(f'{logger.DOWNSTREAM_MASK}{response}\n')
+            logger.write(f'{logger.DOWNSTREAM_MASK}{response}\n')
 
             # Convert the response to dict
             processed_response = parse_semi_formatted_text(response)
@@ -180,6 +176,14 @@ class InformationGatheringProvider(BaseProvider):
         del params
 
         return res_params
+
+    def remove_image_url(self, message_prompts_copy):
+        for item in message_prompts_copy:
+            if item["role"] == "user":
+                for content in item["content"]:
+                    if content["type"] == "image_url":
+                        content["image_url"]["url"] = ""  # 或者使用 "url": "[REDACTED]" 来明确表示内容被删除
+
 
 class RDR2InformationGatheringProvider(BaseProvider):
     def __init__(self,

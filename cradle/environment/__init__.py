@@ -12,3 +12,6 @@ from .dealers import DealersSkillRegistry
 from .dealers import DealersUIControl
 from .stardew import StardewSkillRegistry
 from .stardew import StardewUIControl
+
+from .subnautica import SubnauticaSkillRegistry
+from .subnautica import SubnauticaUIControl

@@ -27,6 +27,10 @@ def main(args):
         runner_module = importlib.import_module('cradle.runner.stardew_runner')
         entry = getattr(runner_module, 'entry')
 
+    elif "subnautica" in config.env_short_name.lower():
+        runner_module = importlib.import_module('cradle.runner.subnautica_runner')
+        entry = getattr(runner_module, 'entry')
+
     assert entry is not None, "Entry function is not defined in the environment module."
 
     # Run the entry
@@ -40,8 +44,11 @@ def get_args_parser():
     return parser
 
 if __name__ == '__main__':
+
     parser = get_args_parser()
     args = parser.parse_args()
+
+    args.envConfig = "./conf/env_config_subnautica.json"
 
     config.load_env_config(args.envConfig)
     config.set_fixed_seed()

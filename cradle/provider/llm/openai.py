@@ -340,7 +340,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
 
             end_time = time.time()  # 记录方法调用后的时间
             execution_time = end_time - start_time  # 计算执行时间
-            print(f">>>>>>>>>>>>>>>>>>>>>>>>>>>>> openai chat time: {execution_time} seconds")  # 打印执行时间
+            logger.write(f">>>>>>>>>>>>>>>>>>>>>>>>>>>>> openai chat time: {execution_time} seconds")  # 打印执行时间
 
             info = {
                 "prompt_tokens" : response.usage.prompt_tokens,

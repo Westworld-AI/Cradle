@@ -6,8 +6,6 @@ from cradle import constants
 from cradle.log import Logger
 from cradle.config import Config
 from cradle.memory import LocalMemory
-from cradle.environment import DealersSkillRegistry
-from cradle.environment import DealersUIControl
 from cradle.provider import RestfulClaudeProvider
 from cradle.provider import OpenAIProvider
 from cradle.gameio.io_env import IOEnvironment
@@ -20,6 +18,7 @@ from cradle.provider import SelfReflectionProvider
 from cradle.provider import TaskInferenceProvider
 from cradle.provider import ActionPlanningProvider
 from cradle.provider import SkillExecuteProvider
+from cradle.environment import SubnauticaSkillRegistry,SubnauticaUIControl
 
 config = Config()
 logger = Logger()
@@ -50,10 +49,10 @@ class PipelineRunner():
 
         self.provider_configs = config.provider_configs
 
-        self.skill_registry = DealersSkillRegistry(
+        self.skill_registry = SubnauticaSkillRegistry(
             embedding_provider=self.embed_provider,
         )
-        self.ui_control = DealersUIControl()
+        self.ui_control = SubnauticaUIControl()
 
         self.gm = GameManager(skill_registry=self.skill_registry, ui_control=self.ui_control)
 
@@ -127,17 +126,9 @@ class PipelineRunner():
         step = 0
         while not success:
             try:
+
                 # 7.1. Information gathering
                 self.run_information_gathering()
-
-                # 7.2. Self reflection
-                self.run_self_reflection()
-
-                # 7.3. Task inference
-                self.run_task_inference()
-
-                # 7.4. Action planning
-                self.run_action_planning()
 
                 step += 1
 
@@ -153,8 +144,9 @@ class PipelineRunner():
         self.pipeline_shutdown()
 
     def run_information_gathering(self):
+
         # 1. Get the video clip to information gathering
-        self.video_clip()
+        self.video_clip(init=True)
 
         # 2. Execute the information gathering provider
         self.information_gathering()
